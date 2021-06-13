@@ -1,73 +1,29 @@
-from abc import abstractproperty
-
-
 class Solution:
     def isMatch(self, s: str, p: str) -> bool:
+        s = ' {}'.format(s)
+        p = ' {}'.format(p)
+        len_s, len_p = len(s), len(p)  
+        result = [[0]*(len_p) for i_s in range(len_s)]
+        result[0][0] = 1
 
-        np = list()
-        np = [x for x in p]
-        plist= list()
-        nl = list()
-        append_next = False
-        for p in np:
-            if p != '*' or append_next:
-                plist.append(p)
-                append_next = False
-            else:
-                append_next = True
-                if len(plist) > 1:
-                    nl.append(plist[:-1])
-                    plist = [plist[-1]]
+        for i_p in range(1, len_p):
+            if p[i_p] == '*' and result[0][i_p] != result[0][i_p-2]:
+                result[0][i_p] = result[0][i_p-2]
 
+        for i_s in range(1, len_s):
+            for i_p in range(1, len_p):
+                if p[i_p] in {s[i_s], '.'} and result[i_s][i_p] != result[i_s-1][i_p-1]:
+                    result[i_s][i_p] = result[i_s-1][i_p-1]
+                elif p[i_p] == "*":
+                    result[i_s][i_p] = result[i_s][i_p-2] or int(result[i_s-1][i_p] and p[i_p-1] in {s[i_s], '.'})
 
-            
-            
-           
-            
-        
-            
+        return bool(result[-1][-1])
 
 
-        match, i = True, 0
-        for l in range(len(p)):
-            try:
-                if i >= len(p):
-                    break
-                check = s[l]
-                if p[i] == '.' or check == p[i] or (p[i] == '*' and (p[i-1] == '.' or p[i-1] == check)):
-                    i += 1
-                    continue
-                else:
-                    try:
-                        if p[i + 1] == "*" and check == p[i + 2]:
-                            p = p[2:]
-                            i += 1
-                            continue
-                        else:
-                            match = False
-                            break
-                    except:
-                        match = False
-                        break
-            except IndexError:
-                match = False
-                if p[-2] == '*' and p[-1] == check:
-                    match = True
-        if len(s) > i and match:
-            if p[-1] == '*':
-                if p[-2] != '.':
-                    for r in range(i, len(s)):
-                        if p[-2] != s[i]:
-                            match = False
-                            break
-                        i += 1
-            else:
-                match = False
-        return match
 
-
-inputs = [["aaca","ab*a*c*a"],['ac', '.*c'], ['ab', '.*c'],['aaa','aaaa'],['abcdef', 'abc.*'], ['abccccccccc', 'abc*'], ["aaaa", "a*"], ["aa", "a"], ["aa", "a*"],
-          ["ab", ".*"], ["aab", "c*a*b"], ["mississippi", "mis*is*p*."]]
-for s, p in inputs:
+inputs = [['ac', '.*c', True], ['ab', '.*c', False],["a",".*..a*",False],["a","ab*a",False],["a","ab*",True],["aaba", "ab*a*c*a", False], ['aaa', 'aaaa', False], ['abcdef', 'abc.*', True], ["aaca", "ab*a*c*a", True], ['vaca', '...a', True], 
+        ['aaabcd', 'a*...', True], ['abcde', 'a*...', False], ['abccccccccc', 'abc*', True], ["aaaa", "a*", True], ["aa", "a", False], ["aa", "a*", True],
+        ["ab", ".*", True], ["aab", "c*a*b", True], ["mississippi", "mis*is*p*.", False]]
+for s, p, e in inputs:
     r = Solution.isMatch(Solution, s, p)
-    print(s, p, r)
+    print(s, p, e == r)
